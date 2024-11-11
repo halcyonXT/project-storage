@@ -8,6 +8,7 @@
 const _ALLOW_LEGACY_TURN = true;
 
 const SDL_CONFIG = {
+    TRACKER_TICK_RATE: 2, // how long tick should wait before re-checking stats of ships for hitrate tracking
     shouldTrackStats: true, // hit/miss rate etc.
 
     runBeforeInit: [],
@@ -1327,18 +1328,6 @@ const initiateDueler = (ship, forceIndex = null) => {
     ship.custom.isDueling = false;
     ship.custom._statTrack.on = false;
 
-    Object.defineProperty(ship, "generator", {
-        set(v) {
-            TRACK_STATS.generatorTracker(ship, v);
-        }
-    })
-
-    Object.defineProperty(ship, "shield", {
-        set(v) {
-            TRACK_STATS.shieldTracker(ship, v);
-        }
-    })
-
     // Object.defineProperty(ship, "crystals", {
     //     set(v) {
     //         TRACK_STATS.crystalTracker(ship, v);
@@ -2026,7 +2015,7 @@ this.tick = (game) => {
     }
     _lastNumOfShips = game.ships.length;
 
-    if (game.step % 3 === 0) {
+    if (game.step % SDL_CONFIG.TRACKER_TICK_RATE === 0) {
         for (let i = 0, len = _scheduledJobs.length; i < len; i++) {
             let target = _scheduledJobs[i];
             if (target?.triggerOn < game.step) {
@@ -2034,6 +2023,10 @@ this.tick = (game) => {
                 _scheduledJobs.shift();
                 i--;
             } else break;
+        }
+        for (let ship of game.ships) {
+            TRACK_STATS.generatorTracker(ship, ship.generator);
+            TRACK_STATS.shieldTracker(ship, ship.shield);
         }
     }
 
