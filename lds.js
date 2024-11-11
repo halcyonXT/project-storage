@@ -1943,7 +1943,6 @@ const FLEETING_TTL = 3000;
 let fleetingTimer = null
 const fleetingMessage = (ship, message) => {
     if (!ship.custom._ttlTimer) {
-        clearTimeout(fleetingTimer);
         ship.setUIComponent({
             id: "fleeting",
             position: [0, 80, 78, 5],
@@ -1954,14 +1953,13 @@ const fleetingMessage = (ship, message) => {
             ]
         })
         //fleetingTimer = 
-        ship.custom._ttlTimer = setTimeout(() => {
+        ship.custom._ttlTimer = scheduleJob(FLEETING_TTL, () => {
             ship.setUIComponent({
                 id: "fleeting",
                 ...NULL_COMPONENT
             })
-            clearTimeout(ship.custom._ttlTimer);
             ship.custom._ttlTimer = null;
-        }, FLEETING_TTL)
+        })
     }
 }
 
